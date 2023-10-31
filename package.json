@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build && npm run serve",
-    "serve": "http-server",
+    "serve": "live-server --cors",
     "build": "webpack --config webpack.config.js"
   },
   "repository": {
@@ -23,6 +23,7 @@
     "@types/node": "^20.8.7",
     "@webgpu/types": "^0.1.38",
     "http-server": "^14.1.1",
+    "live-server": "^1.2.2",
     "ts-loader": "^9.5.0",
     "ts-shader-loader": "^2.0.2",
     "typescript": "^5.2.2",
