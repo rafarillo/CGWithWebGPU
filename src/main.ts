@@ -1,11 +1,8 @@
-const output_label:HTMLElement = <HTMLElement> document.getElementById("compatibility-check");
+import { Render } from "./rendert";
 
-if(navigator.gpu)
+const canvas:HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("myCanvas");
+if(!canvas)
 {
-    output_label.innerText = "This browser can support WebGPU";
+    console.log("Could not find canvas");
 }
-else
-{
-    output_label.innerText = "This browser can't support WebGPU";
-
-}
+let rend:Render = new Render(canvas)
