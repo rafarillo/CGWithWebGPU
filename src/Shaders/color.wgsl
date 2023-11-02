@@ -11,18 +11,17 @@ struct VertexWithColor{
         vec2f(0.5, -0.5),
     );
 
-    let color = array<vec4f, 3>(
-        vec4f(1, 0, 0, 1),
-        vec4f(0, 1, 0, 1),
-        vec4f(0, 0, 1, 1),
-    );
-
     var vcOutput:VertexWithColor;
     vcOutput.position = vec4f(pos[vertexIndex], 0.0, 1.0);
-    vcOutput.color = color[vertexIndex] ;
     return vcOutput;
 }
 
 @fragment fn fs(input:VertexWithColor) -> @location(0) vec4f{
-    return input.color;
+    let red = vec4f(1, 0, 0, 1);
+    let green = vec4f(0, 1, 0, 1);
+
+    let grid = vec2u(input.position.xy)/8;
+
+    return select (red, green, (grid.x + grid.y)%2 == 1);
+
 }
