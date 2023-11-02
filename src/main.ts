@@ -5,4 +5,5 @@ if(!canvas)
 {
     console.log("Could not find canvas");
 }
-let rend:Render = new Render(canvas)
+
+let rend:Render = new Render(canvas);

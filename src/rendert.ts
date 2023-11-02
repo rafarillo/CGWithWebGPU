@@ -2,42 +2,63 @@ import color from "./Shaders/color.wgsl"
 
 export class Render
 {
-    canvas:HTMLCanvasElement;
-    adapter!:GPUAdapter;
-    device!:GPUDevice;
-    context!:GPUCanvasContext
+    private canvas:HTMLCanvasElement;
+    private adapter!:GPUAdapter;
+    private device!:GPUDevice;
+    private context!:GPUCanvasContext;
+    private pipeline!:GPURenderPipeline;
 
     constructor(canvas:HTMLCanvasElement)
     {
         this.canvas = canvas;
         this.SetupDevice();
-        this.SetContext();
-
-        const format:GPUTextureFormat = <GPUTextureFormat>this.SetContext();
-        if(!format)
-        {
-            console.log("Could not find format");
-        }
-
-        const module:GPUShaderModule = this.CreateShaderModule();
-        const pipeline:GPURenderPipeline = this.CreatePipeline(module, format);
-
-        this.Render(pipeline);
     }
 
-    private async SetupDevice()
+    private SetupDevice()
     {
-        this.adapter = <GPUAdapter> await navigator.gpu.requestAdapter();
-        if(!this.adapter) {
-            console.log("Could not find adapter");
-            return;
-        }
+        navigator.gpu.requestAdapter().then((adapterValue: GPUAdapter|null) => {
+            this.adapter = <GPUAdapter>adapterValue;
+            if(!this.adapter) {
+                console.log("Could not find adapter");
+                return;
+            }
+
+            this.adapter.requestDevice().then((deviceValue:GPUDevice) => {
+                this.device = deviceValue;
+                const format:GPUTextureFormat = <GPUTextureFormat>this.SetContext();
+                if(!format)
+                {
+                    console.log("Could not find format");
+                }
+    
+                const module:GPUShaderModule = this.CreateShaderModule();
+                this.pipeline = this.CreatePipeline(module, format);
+
+
+                this.ResizingCanvas();
+
+            });
+
+            
+
+        });
         
-        this.device = <GPUDevice> await this.adapter.requestDevice();
-        if(!this.adapter) {
-            console.log("Could not find device");
-            return;
-        }        
+    }
+
+    private ResizingCanvas() {
+        const observer: ResizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
+            for (const entry of entries) {
+                const obsCanvas = <HTMLCanvasElement>entry.target;
+                const width = entry.contentBoxSize[0].inlineSize;
+                const height = entry.contentBoxSize[0].blockSize;
+
+                obsCanvas.width = Math.max(1, Math.min(width, this.device.limits.maxTextureDimension2D));
+                obsCanvas.height = Math.max(1, Math.min(height, this.device.limits.maxTextureDimension2D));
+                this.Render();
+            }
+        });
+
+        observer.observe(this.canvas);
     }
 
     private SetContext():GPUTextureFormat|null
@@ -102,7 +123,7 @@ export class Render
         return renderPassDescriptor;
     }
 
-    private Render(pipeline:GPURenderPipeline)
+    Render()
     {
         
         const renderPassDescriptor:GPURenderPassDescriptor = this.CreateRenderPassDescriptor(this.context.getCurrentTexture().createView())
@@ -110,7 +131,7 @@ export class Render
         const encoder:GPUCommandEncoder = this.device.createCommandEncoder({label: "Our encoder"});
         const pass:GPURenderPassEncoder = encoder.beginRenderPass(renderPassDescriptor); // this could be went wrong
 
-        pass.setPipeline(pipeline);
+        pass.setPipeline(this.pipeline);
         pass.draw(3);
 
         pass.end();
