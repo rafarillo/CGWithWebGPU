@@ -16,9 +16,9 @@ const aspect:number = canvas.width/canvas.height;
 for(let i = 0; i < 100; i++)
 {
     triangles.push(new TriangleMesh(
-        [rand()/aspect, rand()],
-        [rand(), rand(), rand(), 1.0],
-        [rand(), rand()]
+        [rand(0.2, 0.5)/aspect, rand(0.2, 0.5)],
+        [rand(0, 1), rand(0, 1), rand(0, 1), 1.0],
+        [rand(-0.9, 0.9), rand(-0.9, 0.9)]
     ))
 }
 
